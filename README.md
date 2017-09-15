@@ -1,5 +1,5 @@
-Magic square calculator
-=======================
+Magic square finder
+===================
 
 This is a JavaScript implementation of a brute-force algorithm to find [magic squares][w].
 
