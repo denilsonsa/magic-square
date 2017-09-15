@@ -76,10 +76,11 @@ function is_magic(board) {
 
 function recursive_brute_force(board, available, index) {
 	const size = board.length;
-	for (let i of numbers_in_random_order(size * size)) {
-		if (available[i]) {
-			board[~~(index / size)][index % size] = i + 1;
-			available[i] = false;
+	for (let i = 0; i < available.length; i++) {
+		let number = available[i];
+		if (number) {
+			board[~~(index / size)][index % size] = number;
+			available[i] = 0;
 			if (index + 1 === size * size) {
 				// Board completed. Is it magic?
 				if (is_magic(board)) {
@@ -93,7 +94,7 @@ function recursive_brute_force(board, available, index) {
 					recursive_brute_force(board, available, index + 1);
 				}
 			}
-			available[i] = true;
+			available[i] = number;
 			board[~~(index / size)][index % size] = null;
 		}
 	}
@@ -112,8 +113,9 @@ function recalculate(size) {
 	// Numbers still available to be used.
 	var available = [];
 	for (let i = 0; i < size * size; i++) {
-		available[i] = true;
+		available[i] = i + 1;
 	}
+	shuffle_array_in_place(available);
 
 	recursive_brute_force(board, available, 0);
 }
@@ -123,16 +125,6 @@ function shuffle_array_in_place(arr) {
 		let j = Math.floor(Math.random() * (i + 1));
 		[arr[j], arr[i]] = [arr[i], arr[j]];
 	}
-}
-
-// Returns an array of numbers from 0 until max-1 in a random order.
-function numbers_in_random_order(max) {
-	var arr = [];
-	for (let i = 0; i < max; i++) {
-		arr[i] = i;
-	}
-	shuffle_array_in_place(arr);
-	return arr;
 }
 
 onmessage = function(ev) {
