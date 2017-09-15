@@ -72,10 +72,11 @@ function is_magic(board) {
 function recursive_brute_force(board, available, index) {
 	const size = board.length;
 	for (let i = 0; i < available.length; i++) {
-		if (available[i]) {
-			board[~~(index / size)][index % size] = i + 1;
-			available[i] = false;
-			if (index + 1 === available.length) {
+		let number = available[i];
+		if (number) {
+			board[~~(index / size)][index % size] = number;
+			available[i] = 0;
+			if (index + 1 === size * size) {
 				// Board completed. Is it magic?
 				if (is_magic(board)) {
 					postMessage(board);
@@ -88,7 +89,7 @@ function recursive_brute_force(board, available, index) {
 					recursive_brute_force(board, available, index + 1);
 				}
 			}
-			available[i] = true;
+			available[i] = number;
 			board[~~(index / size)][index % size] = null;
 		}
 	}
@@ -106,10 +107,18 @@ function recalculate(size) {
 	// Numbers still available to be used.
 	var available = [];
 	for (let i = 0; i < size * size; i++) {
-		available[i] = true;
+		available[i] = i + 1;
 	}
+	shuffle_array_in_place(available);
 
 	recursive_brute_force(board, available, 0);
+}
+
+function shuffle_array_in_place(arr) {
+	for (let i = arr.length - 1; i > 0; i--) {
+		let j = Math.floor(Math.random() * (i + 1));
+		[arr[j], arr[i]] = [arr[i], arr[j]];
+	}
 }
 
 onmessage = function(ev) {
