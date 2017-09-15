@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf8">
+<title>Magic square</title>
+<style>
+html, body {
+	font-family: sans-serif;
+	color: black;
+	background: white;
+}
+#solutions table {
+	border-collapse: collapse;
+	border: 1px gray solid;
+	margin: 4px;
+	display: inline-table;
+}
+#solutions table td {
+	padding: 4px;
+	text-align: center;
+	vertical-align: middle;
+	color: black;
+}
+#solutions table tr:nth-child(even) td:nth-child(even) { background: white; }
+#solutions table tr:nth-child(odd)  td:nth-child(odd)  { background: white; }
+#solutions table tr:nth-child(odd)  td:nth-child(even) { background: silver; }
+#solutions table tr:nth-child(even) td:nth-child(odd)  { background: silver; }
+</style>
+</head>
+<body>
+
+<h1>Magic square calculator</h1>
+
+<p>This tool uses a brute-force algorithm to find as many <a href="https://en.wikipedia.org/wiki/Magic_square">magic squares</a> as possible.</p>
+
+<input id="size" type="number" min="3" step="1" value="3">
+<input id="start" type="button" value="Start calculating">
+<input id="stop" type="button" value="Stop" disabled>
+
+<div id="solutions"></div>
+
+<script>
+'use strict';
+
+
+var g_worker = null;
+
+function interrupt_worker() {
+	if (g_worker) {
+		g_worker.terminate();
+		g_worker = null;
+
+		document.getElementById('stop').setAttribute('disabled', 'disabled');
+	}
+}
+
+function clear_solutions() {
+	document.getElementById('solutions').innerHTML = '';
+}
+function add_solution(board) {
+	var table = document.createElement('table');
+	for (let row of board) {
+		let tr = document.createElement('tr');
+		table.appendChild(tr);
+		for (let cell of row) {
+			let td = document.createElement('td');
+			td.textContent = cell;
+			tr.appendChild(td);
+		}
+	}
+	document.getElementById('solutions').appendChild(table);
+}
+
+function worker_message_handler(ev) {
+	var board = ev.data;
+	if (board) {
+		add_solution(board);
+	} else {
+		interrupt_worker();
+	}
+}
+
+function start_handler() {
+	var size = document.getElementById('size').valueAsNumber;
+	if (size < 3) return;
+
+	interrupt_worker();
+	document.getElementById('stop').removeAttribute('disabled');
+
+	g_worker = new Worker('worker.js');
+	g_worker.addEventListener('message', worker_message_handler);
+	g_worker.postMessage(size);
+
+}
+
+function stop_handler() {
+	interrupt_worker();
+}
+
+function init() {
+	document.getElementById('start').addEventListener('click', start_handler);
+	document.getElementById('stop').addEventListener('click', stop_handler);
+}
+init();
+
+</script>
+</body>
+</html>
