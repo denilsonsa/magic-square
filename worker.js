@@ -98,6 +98,14 @@ function recursive_brute_force(board, available, index) {
 			board[~~(index / size)][index % size] = null;
 		}
 	}
+
+	// Do you want to improve this algorithm?
+	// The current implementation doesn't look for rotations or reflections.
+	// Thus, a better algorithm would avoid testing the same rotated and/or
+	// reflected squares. However, this would only cut the search space by 8,
+	// which is not much when we consider 25! = 15 septillion.
+	// In other words, the effort to implement this is not worth the trouble,
+	// and in the end might be slower than not implementing it.
 }
 
 // Main function of this script. Well, the entry point.
