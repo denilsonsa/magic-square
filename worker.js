@@ -3,15 +3,17 @@
 function is_magic(board) {
 	const size = board.length;
 	const magicsum = size * (size * size + 1) / 2;
+	var is_incomplete = false;
 	var sum;
 
 	// Horizontals.
+	horizontals:
 	for (let i = 0; i < size; i++) {
 		sum = 0;
 		for (let j = 0; j < size; j++) {
 			if (board[i][j] === null) {
-				// Incomplete board.
-				return true;  // More like "maybe".
+				is_incomplete = true;
+				break horizontals;
 			} else {
 				sum += board[i][j];
 			}
@@ -22,44 +24,42 @@ function is_magic(board) {
 	}
 
 	// Verticals.
+	verticals:
 	for (let i = 0; i < size; i++) {
 		sum = 0;
 		for (let j = 0; j < size; j++) {
-			sum += board[j][i];
+			if (board[j][i] === null) {
+				is_incomplete = true;
+				break verticals;
+			} else {
+				sum += board[j][i];
+			}
 		}
 		if (sum !== magicsum) {
 			return false;
 		}
 	}
 
-	// Diagonals.
+	// Diagonal.
+	if (board[size - 1][0] !== null) {
+		sum = 0;
+		for (let i = 0; i < size; i++) {
+			sum += board[size - 1 - i][i];
+		}
+		if (sum !== magicsum) {
+			return false;
+		}
+	}
+
+	if (is_incomplete) {
+		// Incomplete board.
+		return true;  // More like "maybe".
+	}
+
+	// Diagonal.
 	sum = 0;
 	for (let i = 0; i < size; i++) {
 		sum += board[i][i];
-	}
-	if (sum !== magicsum) {
-		return false;
-	}
-
-	sum = 0;
-	for (let i = 0; i < size; i++) {
-		sum += board[size - 1 - i][i];
-	}
-	if (sum !== magicsum) {
-		return false;
-	}
-
-	sum = 0;
-	for (let i = 0; i < size; i++) {
-		sum += board[i][size - 1 - i];
-	}
-	if (sum !== magicsum) {
-		return false;
-	}
-
-	sum = 0;
-	for (let i = 0; i < size; i++) {
-		sum += board[size - 1 - i][size - 1 - i];
 	}
 	if (sum !== magicsum) {
 		return false;
@@ -74,7 +74,7 @@ function recursive_brute_force(board, available, index) {
 	for (let i = 0; i < available.length; i++) {
 		if (available[i]) {
 			board[~~(index / size)][index % size] = i + 1;
-			available[i] = 0;
+			available[i] = false;
 			if (index + 1 === available.length) {
 				// Board completed. Is it magic?
 				if (is_magic(board)) {
@@ -88,14 +88,13 @@ function recursive_brute_force(board, available, index) {
 					recursive_brute_force(board, available, index + 1);
 				}
 			}
-			available[i] = 1;
+			available[i] = true;
 			board[~~(index / size)][index % size] = null;
 		}
 	}
 }
 
 function recalculate(size) {
-	// Init.
 	var board = [];
 	for (let i = 0; i < size; i++) {
 		board[i] = [];
@@ -104,9 +103,10 @@ function recalculate(size) {
 		}
 	}
 
+	// Numbers still available to be used.
 	var available = [];
 	for (let i = 0; i < size * size; i++) {
-		available[i] = 1;
+		available[i] = true;
 	}
 
 	recursive_brute_force(board, available, 0);
