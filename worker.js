@@ -2,39 +2,42 @@
 
 function is_magic(board) {
 	const size = board.length;
-
-	var basesum = 0;
-	for (let i = 0; i < size; i++) {
-		basesum += board[0][i];
-	}
-
+	const magicsum = size * (size * size + 1) / 2;
 	var sum;
 
+	// Horizontals.
 	for (let i = 0; i < size; i++) {
 		sum = 0;
 		for (let j = 0; j < size; j++) {
-			sum += board[i][j];
+			if (board[i][j] === null) {
+				// Incomplete board.
+				return true;  // More like "maybe".
+			} else {
+				sum += board[i][j];
+			}
 		}
-		if (sum != basesum) {
+		if (sum !== magicsum) {
 			return false;
 		}
 	}
 
+	// Verticals.
 	for (let i = 0; i < size; i++) {
 		sum = 0;
 		for (let j = 0; j < size; j++) {
 			sum += board[j][i];
 		}
-		if (sum != basesum) {
+		if (sum !== magicsum) {
 			return false;
 		}
 	}
 
+	// Diagonals.
 	sum = 0;
 	for (let i = 0; i < size; i++) {
 		sum += board[i][i];
 	}
-	if (sum != basesum) {
+	if (sum !== magicsum) {
 		return false;
 	}
 
@@ -42,7 +45,7 @@ function is_magic(board) {
 	for (let i = 0; i < size; i++) {
 		sum += board[size - 1 - i][i];
 	}
-	if (sum != basesum) {
+	if (sum !== magicsum) {
 		return false;
 	}
 
@@ -50,7 +53,7 @@ function is_magic(board) {
 	for (let i = 0; i < size; i++) {
 		sum += board[i][size - 1 - i];
 	}
-	if (sum != basesum) {
+	if (sum !== magicsum) {
 		return false;
 	}
 
@@ -58,10 +61,11 @@ function is_magic(board) {
 	for (let i = 0; i < size; i++) {
 		sum += board[size - 1 - i][size - 1 - i];
 	}
-	if (sum != basesum) {
+	if (sum !== magicsum) {
 		return false;
 	}
 
+	// This is definitely a magic square!
 	return true;
 }
 
@@ -71,14 +75,21 @@ function recursive_brute_force(board, available, index) {
 		if (available[i]) {
 			board[~~(index / size)][index % size] = i + 1;
 			available[i] = 0;
-			if (index + 1 == available.length) {
+			if (index + 1 === available.length) {
+				// Board completed. Is it magic?
 				if (is_magic(board)) {
 					postMessage(board);
 				}
 			} else {
-				recursive_brute_force(board, available, index + 1);
+				// Board incomplete, we need to recurse.
+				// But first let's check if the incomplete board can become a
+				// magic square or if we can already abort this brute-force branch.
+				if (index + 1 < size || is_magic(board)) {
+					recursive_brute_force(board, available, index + 1);
+				}
 			}
 			available[i] = 1;
+			board[~~(index / size)][index % size] = null;
 		}
 	}
 }
@@ -98,7 +109,6 @@ function recalculate(size) {
 		available[i] = 1;
 	}
 
-	debugger;
 	recursive_brute_force(board, available, 0);
 }
 

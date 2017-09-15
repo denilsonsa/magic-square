@@ -10,21 +10,24 @@ html, body {
 	background: white;
 }
 #solutions table {
+	display: inline-table;
+	table-layout: fixed;
 	border-collapse: collapse;
 	border: 1px gray solid;
 	margin: 4px;
-	display: inline-table;
 }
 #solutions table td {
-	padding: 4px;
+	padding: 0;
+	width: 2em;
+	height: 2em;
 	text-align: center;
 	vertical-align: middle;
 	color: black;
 }
 #solutions table tr:nth-child(even) td:nth-child(even) { background: white; }
 #solutions table tr:nth-child(odd)  td:nth-child(odd)  { background: white; }
-#solutions table tr:nth-child(odd)  td:nth-child(even) { background: silver; }
-#solutions table tr:nth-child(even) td:nth-child(odd)  { background: silver; }
+#solutions table tr:nth-child(odd)  td:nth-child(even) { background: #E8E8E8; }
+#solutions table tr:nth-child(even) td:nth-child(odd)  { background: #E8E8E8; }
 </style>
 </head>
 <body>
@@ -37,6 +40,8 @@ html, body {
 <input id="start" type="button" value="Start calculating">
 <input id="stop" type="button" value="Stop" disabled>
 
+<div><output id="how_many">0</output> solution(s) found.</div>
+
 <div id="solutions"></div>
 
 <script>
@@ -44,6 +49,7 @@ html, body {
 
 
 var g_worker = null;
+var g_how_many_solutions = 0;
 
 function interrupt_worker() {
 	if (g_worker) {
@@ -56,6 +62,7 @@ function interrupt_worker() {
 
 function clear_solutions() {
 	document.getElementById('solutions').innerHTML = '';
+	document.getElementById('how_many').value = g_how_many_solutions = 0;
 }
 function add_solution(board) {
 	var table = document.createElement('table');
@@ -69,6 +76,7 @@ function add_solution(board) {
 		}
 	}
 	document.getElementById('solutions').appendChild(table);
+	document.getElementById('how_many').value = ++g_how_many_solutions;
 }
 
 function worker_message_handler(ev) {
@@ -85,6 +93,7 @@ function start_handler() {
 	if (size < 3) return;
 
 	interrupt_worker();
+	clear_solutions();
 	document.getElementById('stop').removeAttribute('disabled');
 
 	g_worker = new Worker('worker.js');
